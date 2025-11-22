@@ -3,26 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Gallery</title>
+    <title>My Cloud</title>
     <style>
         body { margin: 0; padding: 20px; background-color: #f0f2f5; font-family: sans-serif; }
-        h1 { text-align: center; color: #333; margin-bottom: 20px; }
+        h1 { text-align: center; color: #333; margin-bottom: 20px; font-weight: 300; }
         
+        /* 갤러리 스타일 */
         .gallery {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             gap: 10px;
-            max-width: 800px;
+            max-width: 1000px;
             margin: 0 auto;
         }
-        .photo-item img {
+        .item {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            background: white;
+            aspect-ratio: 1 / 1; /* 정사각형 비율 유지 */
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .item:hover { transform: scale(1.03); }
+        .item img {
             width: 100%;
-            height: 150px;
+            height: 100%;
             object-fit: cover;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        /* 동영상 아이콘 오버레이 */
+        .video-icon {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px; height: 40px;
+            background: rgba(0,0,0,0.6);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .video-icon::after {
+            content: "▶";
+            color: white; font-size: 20px; padding-left: 4px;
         }
 
+        /* 업로드 버튼 */
         .fab {
             position: fixed; bottom: 30px; right: 30px;
             width: 60px; height: 60px;
@@ -30,37 +55,44 @@
             display: flex; align-items: center; justify-content: center;
             color: white; font-size: 30px; cursor: pointer;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 100;
         }
         
+        /* 상태 메시지 */
         #status {
-            position: fixed; top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
+            position: fixed; top: 20px; left: 50%;
+            transform: translateX(-50%);
             background: rgba(0,0,0,0.8); color: white;
-            padding: 20px; border-radius: 10px;
-            display: none; z-index: 999;
+            padding: 12px 24px; border-radius: 30px;
+            display: none; z-index: 999; font-size: 14px;
         }
+        
+        /* 안내 문구 */
+        .guide { text-align: center; color: #888; font-size: 12px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
-    <h1>My Gallery</h1>
+    <h1>My Archive</h1>
+    <div class="guide">버튼을 누르거나, 복사한 이미지를 Ctrl+V 하세요</div>
+    
     <div id="status">처리중...</div>
     <div class="gallery" id="gallery"></div>
 
     <label class="fab">
         +
-        <input type="file" id="fileInput" accept="image/*" style="display: none;">
+        <input type="file" id="fileInput" accept="image/*,video/*" style="display: none;">
     </label>
 
     <script>
-        // ▼▼▼ 여기에 새 배포 URL을 넣으세요 (따옴표 유지!) ▼▼▼
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzE5eptvRx8jw2yYqc94qD5kFM1BByxd-3V75PeBIXc2kBDdAG-Ka83fWyZ7aBQf0Mk/exec";
+        // ▼▼▼ 여기에 배포된 웹 앱 URL을 넣으세요 ▼▼▼
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzQUIiQAe7IX1bMVRgV0fse1QpDJ2F3AX1u4vBuCaWWS1TdIgDBX8V92b1I8dBcb5w/exec";
         // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
         const statusDiv = document.getElementById('status');
         const gallery = document.getElementById('gallery');
 
-        // 1. 목록 불러오기 (CORS 회피용 단순 호출)
+        // 1. 목록 불러오기
         window.onload = function() {
             fetch(SCRIPT_URL)
                 .then(res => res.json())
@@ -68,20 +100,34 @@
                     gallery.innerHTML = '';
                     data.forEach(item => {
                         const div = document.createElement('div');
-                        div.className = 'photo-item';
-                        div.innerHTML = `<a href="${item.url}" target="_blank"><img src="${item.url}"></a>`;
+                        div.className = 'item';
+                        
+                        // 동영상이면 플레이 아이콘 표시
+                        let iconHtml = item.mimeType.includes('video') ? '<div class="video-icon"></div>' : '';
+                        
+                        // 클릭하면 원본 보기 (새 탭)
+                        div.innerHTML = `
+                            <a href="${item.originUrl}" target="_blank">
+                                <img src="${item.url}" loading="lazy">
+                                ${iconHtml}
+                            </a>
+                        `;
                         gallery.appendChild(div);
                     });
                 })
-                .catch(err => console.log("목록 로딩 실패(아직 파일이 없거나 권한 문제):", err));
+                .catch(err => console.log("로딩 실패:", err));
         };
 
-        // 2. 파일 업로드 (무적 전송 방식)
-        document.getElementById('fileInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
+        // 2. 파일 업로드 함수 (공통 사용)
+        function uploadFile(file) {
             if (!file) return;
+            
+            // 용량 체크 (50MB 제한 경고)
+            if (file.size > 50 * 1024 * 1024) {
+                alert("구글 정책상 50MB 이상의 파일은 업로드가 실패할 수 있습니다.");
+            }
 
-            statusDiv.innerText = "업로드 중...";
+            statusDiv.innerText = "업로드 중... (" + file.name + ")";
             statusDiv.style.display = 'block';
 
             const reader = new FileReader();
@@ -89,7 +135,6 @@
             reader.onload = function() {
                 const rawBase64 = reader.result.split(',')[1];
                 
-                // 데이터를 텍스트로 변환하여 전송 (보안 검사 회피)
                 const payload = JSON.stringify({
                     filename: file.name,
                     mimeType: file.type,
@@ -99,22 +144,35 @@
                 fetch(SCRIPT_URL, {
                     method: "POST",
                     body: payload 
-                    // 중요: 헤더(Header)를 아예 안 보내야 보안 경고가 안 뜹니다.
                 })
                 .then(res => res.text())
                 .then(text => {
-                    statusDiv.innerText = "업로드 성공!";
+                    statusDiv.innerText = "완료! 새로고침 중...";
                     setTimeout(() => {
-                        statusDiv.style.display = 'none';
-                        location.reload(); // 새로고침해서 사진 보여주기
+                        location.reload();
                     }, 1000);
                 })
                 .catch(err => {
-                    statusDiv.innerText = "업로드 실패";
-                    console.error(err);
+                    statusDiv.innerText = "실패했습니다.";
                     setTimeout(() => statusDiv.style.display = 'none', 2000);
                 });
             };
+        }
+
+        // 3. 파일 선택기 이벤트 (버튼 클릭)
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            uploadFile(e.target.files[0]);
+        });
+
+        // 4. ★ 붙여넣기(Paste) 이벤트 리스너 ★
+        window.addEventListener('paste', function(e) {
+            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+            for (let item of items) {
+                if (item.kind === 'file') {
+                    const file = item.getAsFile();
+                    uploadFile(file); // 붙여넣은 파일 즉시 업로드
+                }
+            }
         });
     </script>
 </body>
