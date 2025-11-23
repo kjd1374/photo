@@ -3,106 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Archive 2.0</title>
+    <title>My Archive Final</title>
     <style>
         :root {
-            --bg-color: #f4f4f9;
-            --card-bg: #ffffff;
-            --text-color: #333333;
-            --accent-color: #007AFF;
+            --bg-color: #f4f4f9; --card-bg: #ffffff; --text-color: #333333; --accent-color: #007AFF;
         }
-        /* 다크 모드 변수 */
         body.dark-mode {
-            --bg-color: #121212;
-            --card-bg: #1e1e1e;
-            --text-color: #e0e0e0;
-            --accent-color: #4dabf7;
+            --bg-color: #121212; --card-bg: #1e1e1e; --text-color: #e0e0e0; --accent-color: #4dabf7;
         }
-
         body { margin: 0; padding: 20px; background-color: var(--bg-color); color: var(--text-color); font-family: -apple-system, BlinkMacSystemFont, sans-serif; transition: background 0.3s, color 0.3s; }
         
-        /* 헤더 영역 */
+        /* 헤더 & 검색 */
         header { display: flex; justify-content: space-between; align-items: center; max-width: 1000px; margin: 0 auto 20px; padding: 0 10px; }
         h1 { margin: 0; font-weight: 700; letter-spacing: -0.5px; }
-        
         .controls { display: flex; gap: 10px; }
         .btn-icon { background: var(--card-bg); border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; font-size: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; color: var(--text-color); transition: 0.2s; }
         .btn-icon:hover { transform: scale(1.1); }
-
-        /* 검색창 */
         .search-box { max-width: 1000px; margin: 0 auto 20px; padding: 0 10px; }
         #searchInput { width: 100%; padding: 12px 20px; border-radius: 25px; border: none; background: var(--card-bg); color: var(--text-color); box-shadow: 0 2px 10px rgba(0,0,0,0.05); font-size: 16px; outline: none; box-sizing: border-box; }
 
         /* 갤러리 그리드 */
-        .gallery {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 12px;
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-        .item {
-            position: relative; border-radius: 12px; overflow: hidden;
-            background: var(--card-bg); aspect-ratio: 1 / 1; cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s;
-        }
+        .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; max-width: 1000px; margin: 0 auto; }
+        .item { position: relative; border-radius: 12px; overflow: hidden; background: var(--card-bg); aspect-ratio: 1 / 1; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s; }
         .item:hover { transform: translateY(-3px); }
         .item img { width: 100%; height: 100%; object-fit: cover; transition: opacity 0.3s; }
-        
-        /* 동영상 아이콘 */
         .video-badge { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6); color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
-
-        /* 더보기 버튼 */
         #loadMoreBtn { display: block; margin: 30px auto; padding: 10px 30px; background: var(--accent-color); color: white; border: none; border-radius: 20px; font-size: 16px; cursor: pointer; display: none; }
 
-        /* 업로드 버튼 (플로팅) */
-        .fab {
-            position: fixed; bottom: 30px; right: 30px;
-            width: 60px; height: 60px; background-color: var(--accent-color);
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            color: white; font-size: 32px; cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 90; transition: transform 0.2s;
-        }
+        /* 업로드 버튼 & 진행률바 */
+        .fab { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background-color: var(--accent-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 32px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 90; transition: transform 0.2s; }
         .fab:hover { transform: scale(1.1) rotate(90deg); }
-
-        /* 라이트박스 (상세보기) */
-        .lightbox {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); z-index: 1000; display: none;
-            flex-direction: column; align-items: center; justify-content: center;
-        }
-        .lb-content { position: relative; max-width: 90%; max-height: 80%; }
-        .lb-content img, .lb-content video { max-width: 100%; max-height: 80vh; border-radius: 4px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
-        
-        /* 라이트박스 컨트롤 */
-        .lb-close { position: absolute; top: 20px; right: 20px; color: white; font-size: 40px; cursor: pointer; z-index: 1001; }
-        .lb-nav { position: absolute; top: 50%; transform: translateY(-50%); color: white; font-size: 40px; cursor: pointer; padding: 20px; user-select: none; z-index: 1001; }
-        .lb-prev { left: 10px; }
-        .lb-next { right: 10px; }
-        
-        /* 라이트박스 하단 툴바 (삭제 버튼 등) */
-        .lb-toolbar { margin-top: 20px; display: flex; gap: 20px; }
-        .lb-btn { padding: 8px 20px; border-radius: 20px; border: 1px solid white; background: transparent; color: white; cursor: pointer; font-size: 14px; }
-        .lb-btn.delete { border-color: #ff4444; color: #ff4444; }
-        .lb-btn.delete:hover { background: #ff4444; color: white; }
-        .lb-btn:hover { background: white; color: black; }
-
-        /* 로딩 및 진행률 바 */
-        #progressModal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7); display: none;
-            align-items: center; justify-content: center; z-index: 2000;
-        }
+        #progressModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 2000; }
         .progress-box { background: white; padding: 30px; border-radius: 15px; text-align: center; width: 80%; max-width: 300px; }
         .progress-bar { width: 100%; height: 10px; background: #eee; border-radius: 5px; margin-top: 15px; overflow: hidden; }
         .progress-fill { height: 100%; background: var(--accent-color); width: 0%; transition: width 0.3s; }
 
-        /* 유틸리티 */
+        /* [수정됨] 라이트박스 스타일 (iframe 대응) */
+        .lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        /* iframe을 담을 컨테이너 */
+        .lb-content { position: relative; width: 90%; height: 80%; display: flex; justify-content: center; align-items: center; }
+        /* 구글 뷰어 iframe 스타일 */
+        .lb-content iframe { width: 100%; height: 100%; border: none; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.5); background: #000; }
+        
+        .lb-close { position: absolute; top: 20px; right: 20px; color: white; font-size: 40px; cursor: pointer; z-index: 1001; }
+        .lb-nav { position: absolute; top: 50%; transform: translateY(-50%); color: white; font-size: 40px; cursor: pointer; padding: 20px; user-select: none; z-index: 1001; }
+        .lb-prev { left: 10px; } .lb-next { right: 10px; }
+        .lb-toolbar { margin-top: 20px; display: flex; gap: 20px; }
+        .lb-btn { padding: 8px 20px; border-radius: 20px; border: 1px solid white; background: transparent; color: white; cursor: pointer; font-size: 14px; text-decoration: none; }
+        .lb-btn.delete { border-color: #ff4444; color: #ff4444; }
+        .lb-btn.delete:hover { background: #ff4444; color: white; }
+        .lb-btn:hover { background: white; color: black; }
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
-
     <header>
         <h1>Archive</h1>
         <div class="controls">
@@ -110,256 +64,103 @@
             <button class="btn-icon" onclick="location.reload()" title="새로고침">🔄</button>
         </div>
     </header>
-
-    <div class="search-box">
-        <input type="text" id="searchInput" placeholder="파일 이름 검색..." onkeyup="filterImages()">
-    </div>
+    <div class="search-box"><input type="text" id="searchInput" placeholder="파일 이름 검색..." onkeyup="filterImages()"></div>
 
     <div class="gallery" id="gallery"></div>
-    <button id="loadMoreBtn" onclick="loadMore()">더 보기 (+20)</button>
+    <button id="loadMoreBtn" onclick="loadMore()">더 보기 (+24)</button>
 
-    <!-- 업로드 버튼 -->
-    <label class="fab">
-        +
-        <input type="file" id="fileInput" accept="image/*,video/*" style="display: none;">
-    </label>
+    <label class="fab">+<input type="file" id="fileInput" accept="image/*,video/*" style="display: none;"></label>
+    <div id="progressModal"><div class="progress-box"><h3 style="margin:0 0 10px 0; color:#333">업로드 중...</h3><div id="progressText">0%</div><div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div></div></div>
 
-    <!-- 진행률 모달 -->
-    <div id="progressModal">
-        <div class="progress-box">
-            <h3 style="margin:0 0 10px 0; color:#333">업로드 중...</h3>
-            <div id="progressText">0%</div>
-            <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-        </div>
-    </div>
-
-    <!-- 라이트박스 (크게 보기) -->
     <div class="lightbox" id="lightbox">
         <div class="lb-close" onclick="closeLightbox()">&times;</div>
         <div class="lb-nav lb-prev" onclick="changeSlide(-1)">&#10094;</div>
         <div class="lb-nav lb-next" onclick="changeSlide(1)">&#10095;</div>
         
         <div class="lb-content" id="lbContent">
-            <!-- 이미지나 비디오가 여기 들어감 -->
-        </div>
+            </div>
 
         <div class="lb-toolbar">
-            <button class="lb-btn" onclick="downloadCurrent()">다운로드</button>
             <button class="lb-btn delete" onclick="deleteCurrent()">삭제하기</button>
         </div>
     </div>
 
     <script>
         // ▼▼▼ [필수] 배포된 새 URL 넣기 ▼▼▼
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzMF3w-Okw-cWxyhwMMr6YcwtdDxmcP0GHCCYcW3dUfxzVek-ceglpILD4U4HLJfagG/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwnkQ6Fh0JaM94AmS_HLQfD9O5wB2AHTMW17YF0a9p86RLu4G5kmEOOU5TodJfIqNb-/exec";
         // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
-        let allFiles = [];      // 전체 파일 리스트
-        let displayedCount = 0; // 현재 보여주는 개수
-        const batchSize = 24;   // 한 번에 보여줄 개수
-        let currentIndex = -1;  // 라이트박스 현재 보고 있는 파일 인덱스
+        let allFiles = [], displayedCount = 0, currentIndex = -1;
+        const batchSize = 24, gallery = document.getElementById('gallery'), loadMoreBtn = document.getElementById('loadMoreBtn');
 
-        const gallery = document.getElementById('gallery');
-        const loadMoreBtn = document.getElementById('loadMoreBtn');
-
-        // 1. 시작 시 데이터 로드
         window.onload = async function() {
-            // 다크모드 상태 복구
             if(localStorage.getItem('darkMode') === 'true') document.body.classList.add('dark-mode');
-
-            try {
-                const res = await fetch(SCRIPT_URL);
-                allFiles = await res.json();
-                loadMore(); // 첫 페이지 로드
-            } catch (err) {
-                alert("데이터 로딩 실패. URL을 확인하세요.");
-            }
+            try { const res = await fetch(SCRIPT_URL); allFiles = await res.json(); loadMore(); } catch (err) { alert("로딩 실패. 주소 확인 필요."); }
         };
 
-        // 2. 더 보기 기능 (Pagination)
         function loadMore() {
             const nextBatch = allFiles.slice(displayedCount, displayedCount + batchSize);
-            if (nextBatch.length === 0) {
-                loadMoreBtn.style.display = 'none';
-                return;
-            }
-
+            if (nextBatch.length === 0) { loadMoreBtn.style.display = 'none'; return; }
             nextBatch.forEach((file, index) => {
-                const globalIndex = displayedCount + index;
-                const div = document.createElement('div');
-                div.className = 'item';
-                div.onclick = () => openLightbox(globalIndex);
-
-                // 비디오인지 체크
-                const isVideo = file.mimeType.includes('video');
-                const badge = isVideo ? '<div class="video-badge">VIDEO</div>' : '';
-
-                div.innerHTML = `
-                    <img src="${file.url}" loading="lazy">
-                    ${badge}
-                `;
+                const div = document.createElement('div'); div.className = 'item';
+                div.onclick = () => openLightbox(displayedCount + index);
+                const badge = file.mimeType.includes('video') ? '<div class="video-badge">VIDEO</div>' : '';
+                div.innerHTML = `<img src="${file.url}" loading="lazy">${badge}`;
                 gallery.appendChild(div);
             });
-
             displayedCount += nextBatch.length;
-            
-            // 더 보여줄 게 남았으면 버튼 표시
             loadMoreBtn.style.display = displayedCount < allFiles.length ? 'block' : 'none';
         }
 
-        // 3. 검색 기능
         function filterImages() {
             const query = document.getElementById('searchInput').value.toLowerCase();
-            const items = document.querySelectorAll('.item');
-            let matchCount = 0;
-
-            items.forEach((item, index) => {
-                // 실제 데이터와 매칭 (HTML 순서와 allFiles 순서가 같음을 이용)
-                // 주의: 더보기로 로드된 것만 검색됨
-                if (index < allFiles.length) {
-                    const fileName = allFiles[index].name.toLowerCase();
-                    if (fileName.includes(query)) {
-                        item.classList.remove('hidden');
-                        matchCount++;
-                    } else {
-                        item.classList.add('hidden');
-                    }
-                }
+            document.querySelectorAll('.item').forEach((item, index) => {
+                if (index < allFiles.length) item.classList.toggle('hidden', !allFiles[index].name.toLowerCase().includes(query));
             });
-            
-            // 검색 중일 땐 더보기 버튼 숨김
             loadMoreBtn.style.display = query ? 'none' : 'block';
         }
 
-        // 4. 다크모드 토글
-        function toggleDarkMode() {
-            document.body.classList.toggle('dark-mode');
-            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
-        }
+        function toggleDarkMode() { document.body.classList.toggle('dark-mode'); localStorage.setItem('darkMode', document.body.classList.contains('dark-mode')); }
 
-        // 5. 업로드 (가짜 진행률 바 구현)
-        document.getElementById('fileInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const modal = document.getElementById('progressModal');
-            const bar = document.getElementById('progressFill');
-            const text = document.getElementById('progressText');
-            
-            modal.style.display = 'flex';
-            let progress = 0;
-            
-            // 0~90%까지 가짜 애니메이션
-            const interval = setInterval(() => {
-                if (progress < 90) {
-                    progress += Math.random() * 10;
-                    if (progress > 90) progress = 90;
-                    bar.style.width = progress + '%';
-                    text.innerText = Math.floor(progress) + '%';
-                }
-            }, 300);
-
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = function() {
-                const rawBase64 = reader.result.split(',')[1];
-                const payload = JSON.stringify({ filename: file.name, mimeType: file.type, file: rawBase64 });
-
-                fetch(SCRIPT_URL, { method: "POST", body: payload })
-                .then(res => res.text())
-                .then(text => {
-                    clearInterval(interval);
-                    bar.style.width = '100%';
-                    text.innerText = '100% 완료!';
-                    setTimeout(() => location.reload(), 800);
-                })
-                .catch(err => {
-                    alert("업로드 실패");
-                    modal.style.display = 'none';
-                });
-            };
-        });
-
-        // 6. 붙여넣기 지원
+        document.getElementById('fileInput').addEventListener('change', function(e) { handleUpload(e.target.files[0]); });
         window.addEventListener('paste', (e) => {
             const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-            for (let item of items) {
-                if (item.kind === 'file') {
-                    document.getElementById('fileInput').files = e.clipboardData.files; // fileInput에 할당 시도 (브라우저 제한 있을 수 있음)
-                    // 직접 이벤트 트리거는 어려우니 로직 재사용 권장하지만, 
-                    // 간단히 fileInput change 이벤트를 모방해서 호출
-                    // (여기서는 단순화를 위해 생략하고 파일 선택 권장)
-                    alert("붙여넣은 파일이 감지되었습니다. + 버튼을 눌러 선택해주세요. (보안상 자동 업로드 제한)");
-                }
-            }
+            for (let item of items) if (item.kind === 'file') handleUpload(item.getAsFile());
         });
 
-        // ================= 라이트박스 로직 =================
-
-        function openLightbox(index) {
-            currentIndex = index;
-            updateLightboxContent();
-            document.getElementById('lightbox').style.display = 'flex';
+        function handleUpload(file) {
+            if (!file) return;
+            const modal = document.getElementById('progressModal'), bar = document.getElementById('progressFill'), text = document.getElementById('progressText');
+            modal.style.display = 'flex'; let progress = 0;
+            const interval = setInterval(() => { if (progress < 90) { progress += Math.random()*10; if(progress>90) progress=90; bar.style.width = progress+'%'; text.innerText = Math.floor(progress)+'%'; }}, 300);
+            const reader = new FileReader(); reader.readAsDataURL(file);
+            reader.onload = function() {
+                fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ filename: file.name, mimeType: file.type, file: reader.result.split(',')[1] }) })
+                .then(() => { clearInterval(interval); bar.style.width='100%'; text.innerText='완료!'; setTimeout(() => location.reload(), 800); })
+                .catch(() => { alert("업로드 실패"); modal.style.display = 'none'; });
+            };
         }
 
-        function closeLightbox() {
-            document.getElementById('lightbox').style.display = 'none';
-            // 비디오 멈춤 처리
-            const video = document.querySelector('.lb-content video');
-            if (video) video.pause();
-        }
-
-        function changeSlide(direction) {
-            currentIndex += direction;
-            if (currentIndex < 0) currentIndex = allFiles.length - 1;
-            if (currentIndex >= allFiles.length) currentIndex = 0; // 순환
-            updateLightboxContent();
-        }
-
+        // ================= [수정됨] 라이트박스 로직 =================
+        function openLightbox(index) { currentIndex = index; updateLightboxContent(); document.getElementById('lightbox').style.display = 'flex'; }
+        function closeLightbox() { document.getElementById('lightbox').style.display = 'none'; document.getElementById('lbContent').innerHTML = ''; }
+        function changeSlide(d) { currentIndex += d; if(currentIndex < 0) currentIndex = allFiles.length-1; if(currentIndex >= allFiles.length) currentIndex = 0; updateLightboxContent(); }
+        
         function updateLightboxContent() {
             const file = allFiles[currentIndex];
-            const container = document.getElementById('lbContent');
-            container.innerHTML = ''; // 비우기
-
-            if (file.mimeType.includes('video')) {
-                container.innerHTML = `<video src="${file.originUrl}" controls autoplay style="max-width:100%; max-height:80vh"></video>`;
-            } else {
-                container.innerHTML = `<img src="${file.originUrl}">`;
-            }
-        }
-
-        function downloadCurrent() {
-            const file = allFiles[currentIndex];
-            window.open(file.originUrl, '_blank');
+            // [핵심] img 태그 대신 구글 미리보기 iframe 사용
+            document.getElementById('lbContent').innerHTML = `
+                <iframe src="${file.originUrl}" allow="autoplay" allowfullscreen></iframe>
+            `;
         }
 
         async function deleteCurrent() {
-            if (!confirm("정말 이 파일을 삭제하시겠습니까? (구글 드라이브 휴지통으로 이동됩니다)")) return;
-            
-            const file = allFiles[currentIndex];
-            const btn = document.querySelector('.lb-btn.delete');
-            btn.innerText = "삭제 중...";
-            
-            try {
-                const payload = JSON.stringify({ action: "delete", fileId: file.id });
-                await fetch(SCRIPT_URL, { method: "POST", body: payload });
-                alert("삭제되었습니다.");
-                location.reload();
-            } catch (e) {
-                alert("삭제 실패");
-                btn.innerText = "삭제하기";
-            }
+            if (!confirm("정말 삭제하시겠습니까?")) return;
+            const btn = document.querySelector('.lb-btn.delete'); btn.innerText = "삭제 중...";
+            try { await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "delete", fileId: allFiles[currentIndex].id }) }); alert("삭제되었습니다."); location.reload(); }
+            catch (e) { alert("삭제 실패"); btn.innerText = "삭제하기"; }
         }
-
-        // 키보드 단축키 (좌우 화살표, ESC)
-        document.addEventListener('keydown', function(e) {
-            if (document.getElementById('lightbox').style.display === 'flex') {
-                if (e.key === 'ArrowLeft') changeSlide(-1);
-                if (e.key === 'ArrowRight') changeSlide(1);
-                if (e.key === 'Escape') closeLightbox();
-            }
-        });
-
+        document.addEventListener('keydown', function(e) { if(document.getElementById('lightbox').style.display==='flex'){ if(e.key==='ArrowLeft') changeSlide(-1); if(e.key==='ArrowRight') changeSlide(1); if(e.key==='Escape') closeLightbox(); }});
     </script>
 </body>
 </html>
